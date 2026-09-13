@@ -19,8 +19,17 @@ app.disable('x-powered-by');
 app.use(helmet());
 app.use(
   cors({
-    origin: config.corsOrigins,
-    credentials: true,
+    origin(origin, callback) {
+      // Native clients and same-origin requests do not send an Origin header.
+      if (!origin) return callback(null, true);
+
+      const isConfiguredOrigin = config.corsOrigins.includes(origin);
+      const isLocalFrontend = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
+      if (isConfiguredOrigin || isLocalFrontend) return callback(null, true);
+      return callback(new Error('Origin is not allowed by CORS'));
+    },
+    credentials: false,
   })
 );
 app.use(compression());
