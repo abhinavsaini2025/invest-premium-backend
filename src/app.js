@@ -29,7 +29,10 @@ app.use(
       if (isConfiguredOrigin || isLocalFrontend) return callback(null, true);
       return callback(new Error('Origin is not allowed by CORS'));
     },
-    credentials: false,
+    credentials: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 204,
   })
 );
 app.use(compression());

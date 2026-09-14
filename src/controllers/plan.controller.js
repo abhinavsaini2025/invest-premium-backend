@@ -7,9 +7,27 @@ const walletService = require('../services/wallet.service');
 const referralService = require('../services/referral.service');
 const Notification = require('../models/Notification');
 
+const DEFAULT_PLANS = [
+  { planKey: 'starter', name: 'Starter', investment: 400, dailyIncome: 60, durationDays: 10, totalReturn: 600 },
+  { planKey: 'silver', name: 'Silver', investment: 1200, dailyIncome: 100, durationDays: 18, totalReturn: 1800 },
+  { planKey: 'gold', name: 'Gold', investment: 2800, dailyIncome: 150, durationDays: 30, totalReturn: 4500 },
+  { planKey: 'platinum', name: 'Platinum', investment: 5600, dailyIncome: 320, durationDays: 25, totalReturn: 8000 },
+  { planKey: 'diamond', name: 'Diamond', investment: 12000, dailyIncome: 700, durationDays: 24, totalReturn: 16800 },
+];
+
 // GET /plans
 const listPlans = asyncHandler(async (req, res) => {
-  const plans = await Plan.find({ isActive: true }).sort({ investment: 1 });
+  let plans = await Plan.find({ isActive: true }).sort({ investment: 1 });
+  if (plans.length === 0) {
+    await Plan.bulkWrite(DEFAULT_PLANS.map((plan) => ({
+      updateOne: {
+        filter: { planKey: plan.planKey },
+        update: { $setOnInsert: plan },
+        upsert: true,
+      },
+    })));
+    plans = await Plan.find({ isActive: true }).sort({ investment: 1 });
+  }
   return new ApiResponse(200, { plans }).send(res);
 });
 
