@@ -38,6 +38,7 @@ const config = {
   business: {
     minWithdrawalAmount: Number(process.env.MIN_WITHDRAWAL_AMOUNT || 310),
     referralRewardAmount: Number(process.env.REFERRAL_REWARD_AMOUNT || 100),
+    rewardsTimezone: process.env.REWARDS_TIMEZONE || 'Asia/Kolkata',
   },
 
   corsOrigins: [...new Set([...defaultCorsOrigins, ...configuredCorsOrigins])],

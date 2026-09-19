@@ -87,10 +87,29 @@ async function debit({ userId, amount, category, description, referencePrefix, s
   });
 }
 
+function getWithdrawableBalance(wallet = {}) {
+  const totalEarnings = Number(wallet.totalEarnings || 0);
+  const totalWithdrawn = Number(wallet.totalWithdrawn || 0);
+
+  return Math.max(totalEarnings - totalWithdrawn, 0);
+}
+
+function getRequestableWithdrawalBalance(wallet = {}) {
+  const pendingWithdrawal = Number(wallet.pendingWithdrawal || 0);
+
+  return Math.max(getWithdrawableBalance(wallet) - pendingWithdrawal, 0);
+}
+
 async function getOrCreateWallet(userId) {
   let wallet = await Wallet.findOne({ user: userId });
   if (!wallet) wallet = await Wallet.create({ user: userId });
   return wallet;
 }
 
-module.exports = { credit, debit, getOrCreateWallet };
+module.exports = {
+  credit,
+  debit,
+  getOrCreateWallet,
+  getWithdrawableBalance,
+  getRequestableWithdrawalBalance,
+};

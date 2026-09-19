@@ -16,6 +16,16 @@ const createWithdrawal = asyncHandler(async (req, res) => {
     throw ApiError.badRequest(`Minimum withdrawal amount is ₹${config.business.minWithdrawalAmount}`);
   }
 
+  const wallet = await walletService.getOrCreateWallet(req.user.id);
+  // Keep pending requests reserved so two simultaneous requests cannot spend
+  // the same earnings. The displayed balance remains earnings minus settled
+  // withdrawals, as defined by the product rule.
+  const withdrawableBalance = walletService.getRequestableWithdrawalBalance(wallet);
+
+  if (amount > withdrawableBalance) {
+    throw ApiError.badRequest(`You can withdraw up to ₹${withdrawableBalance} from your daily income.`);
+  }
+
   const destinationSnapshot = method === 'bank'
     ? { accountHolder: req.user.bank.accountHolder, accountNumber: req.user.bank.accountNumber, ifsc: req.user.bank.ifsc }
     : { upiId: req.user.bank.upiId };

@@ -7,7 +7,10 @@ const walletService = require('../services/wallet.service');
 // GET /wallet/summary
 const getSummary = asyncHandler(async (req, res) => {
   const wallet = await walletService.getOrCreateWallet(req.user.id);
-  return new ApiResponse(200, { wallet }).send(res);
+  const walletObject = wallet.toObject ? wallet.toObject() : wallet;
+  walletObject.withdrawableBalance = walletService.getWithdrawableBalance(walletObject);
+
+  return new ApiResponse(200, { wallet: walletObject }).send(res);
 });
 
 // GET /wallet/ledger

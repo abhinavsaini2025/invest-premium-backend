@@ -6,6 +6,7 @@ const ApiResponse = require('../utils/ApiResponse');
 const walletService = require('../services/wallet.service');
 const referralService = require('../services/referral.service');
 const Notification = require('../models/Notification');
+const { getNextMidnight } = require('../jobs/dailyRewards.job');
 
 const DEFAULT_PLANS = [
   { planKey: 'starter', name: 'Starter', investment: 400, dailyIncome: 60, durationDays: 10, totalReturn: 600 },
@@ -64,7 +65,7 @@ const purchasePlan = asyncHandler(async (req, res) => {
     extraWalletInc: { totalInvestment: plan.investment },
   });
 
-  const nextRewardAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const nextRewardAt = getNextMidnight();
 
   const activePlan = await ActivePlan.create({
     user: req.user.id,
