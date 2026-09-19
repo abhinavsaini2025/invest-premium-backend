@@ -2,6 +2,10 @@ const { z } = require('zod');
 
 const mobile = z.string().regex(/^[0-9]{10}$/, 'Mobile number must be exactly 10 digits');
 const password = z.string().min(6, 'Password must be at least 6 characters');
+const referralCode = z.preprocess(
+  (value) => typeof value === 'string' && value.trim() === '' ? undefined : value,
+  z.string().trim().toUpperCase().max(20, 'Referral code is too long').optional(),
+);
 
 const registerSchema = z.object({
   fullName: z.string().trim().min(2, 'Full name is too short').max(100),
@@ -9,7 +13,7 @@ const registerSchema = z.object({
   password,
   securityQuestion: z.string().trim().min(5, 'Security question is too short').max(200),
   securityAnswer: z.string().trim().min(2, 'Security answer is too short').max(200),
-  referralCode: z.string().trim().toUpperCase().optional(),
+  referralCode,
 });
 
 const loginSchema = z.object({
